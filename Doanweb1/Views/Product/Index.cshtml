@@ -1,0 +1,160 @@
+﻿@model PagedList.IPagedList<Doanweb1.Models.Product>
+@using PagedList.Mvc;
+
+
+@{
+    ViewBag.Title = "Danh sách sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Product List Start -->
+<div class="product-view">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="product-view-top">
+                            @using (Html.BeginForm("", "Product", FormMethod.Get, new { @class = "row" }))
+                            {
+                                <div class="col-md-4">
+                                    <div class="product-search">
+                                        @Html.TextBox("productName", ViewBag.CurrentSearch as string, new { @placeholder = "Tìm kiếm sản phẩm" })
+                                        <button type="submit"><i class="fa fa-search"></i></button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="product-short">
+                                        <div class="dropdown">
+                                            <div class="dropdown-toggle" data-toggle="dropdown">Sắp xếp sản phẩm theo</div>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <a href="@Url.Action("", "Product",new { sortOrder = "price", productName = ViewBag.CurrentSearch, priceFilter = ViewBag.CurrentFilter })" class="dropdown-item @(ViewBag.CurrentSort == "price" ? "active" : "")">Giá từ thấp đến cao</a>
+                                                <a href="@Url.Action("", "Product",new { sortOrder = "price_desc", productName = ViewBag.CurrentSearch, priceFilter = ViewBag.CurrentFilter })" class="dropdown-item @(ViewBag.CurrentSort == "price_desc" ? "active" : "")">Giá từ cao đến thấp</a>
+                                                <a href="@Url.Action("", "Product",new { sortOrder = "rating_desc", productName = ViewBag.CurrentSearch, priceFilter = ViewBag.CurrentFilter })" class="dropdown-item @(ViewBag.CurrentSort == "rating_desc" ? "active" : "")">Đánh giá tốt nhất</a>
+                                                <a href="@Url.Action("", "Product",new { sortOrder = "rating", productName = ViewBag.CurrentSearch, priceFilter = ViewBag.CurrentFilter })" class="dropdown-item @(ViewBag.CurrentSort == "rating" ? "active" : "")">Đánh giá tệ nhất</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="product-price-range">
+                                        <div class="dropdown">
+                                            <div class="dropdown-toggle" data-toggle="dropdown">Lọc theo giá tiền</div>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <a href="@Url.Action("", "Product",new { sortOrder = ViewBag.CurrentSort, productName = ViewBag.CurrentSearch, priceFilter = "0" })" class="dropdown-item @(ViewBag.CurrentFilter == "0" ? "active" : "")">Tất cả</a>
+                                                <a href="@Url.Action("", "Product",new { sortOrder = ViewBag.CurrentSort, productName = ViewBag.CurrentSearch, priceFilter = "1" })" class="dropdown-item @(ViewBag.CurrentFilter == "1" ? "active" : "")">Dưới 5.000.000 VND</a>
+                                                <a href="@Url.Action("", "Product",new { sortOrder = ViewBag.CurrentSort, productName = ViewBag.CurrentSearch, priceFilter = "2" })" class="dropdown-item @(ViewBag.CurrentFilter == "2" ? "active" : "")">Từ 5.000.000 VND - 10.000.000 VND</a>
+                                                <a href="@Url.Action("", "Product",new { sortOrder = ViewBag.CurrentSort, productName = ViewBag.CurrentSearch, priceFilter = "3" })" class="dropdown-item @(ViewBag.CurrentFilter == "3" ? "active" : "")">Từ 10.000.000 VND - 50.000.000 VND</a>
+                                                <a href="@Url.Action("", "Product",new { sortOrder = ViewBag.CurrentSort, productName = ViewBag.CurrentSearch, priceFilter = "4" })" class="dropdown-item @(ViewBag.CurrentFilter == "4" ? "active" : "")">Trên 50.000.000 VND</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    @foreach (var product in Model)
+                    {
+                        <div class="col-md-4">
+                            <div class="product-item">
+                                <div class="product-title">
+                                    <a href="@Url.Action("ProductDetail","Product",new {id = product.ProductId})"> @Html.DisplayFor(modelItem => product.ProductName)</a>
+                                    <div class="ratting">
+                                        @for (int i = 1; i <= product.Rating; i++)
+                                        {
+                                            <i class="fa fa-star"></i>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="product-image">
+                                    <a href="@Url.Action("ProductDetail","Product",new {id = product.ProductId})">
+                                        <img src="@product.ImageUrl" alt="Product Image">
+                                    </a>
+                                    <div class="product-action">
+                                        <button class="btnAddToCartOnProduct" data-productid="@product.ProductId"><i class="fa fa-cart-plus"></i></button>
+                                        <button onclick="location.href='/WishList/AddToWishList?productId=@product.ProductId'"><i class="fa fa-heart"></i></button>
+                                    </div>
+                                </div>
+                                <div class="product-price">
+                                    <h3>@string.Format("{0:0,0.}", product.Price)<span> đ</span></h3>
+                                    <a class="btn" href="@Url.Action("AddToCart", "ShoppingCart", new { id = product.ProductId, quantity = 1 })"><i class="fa fa-shopping-cart"></i>Mua ngay</a>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    }
+
+
+                </div>
+
+                <!-- Pagination Start -->
+                <!-- Pagination Start -->
+                <div class="col-md-12">
+                    <nav aria-label="Page navigation example" style="display: flex; justify-content: center;">
+                        @Html.PagedListPager(Model, page => Url.Action("Index", new { page, sortOrder = ViewBag.CurrentSort, productName = ViewBag.CurrentSearch, priceFilter = ViewBag.CurrentFilter }))
+                    </nav>
+                </div>
+                <!-- Pagination Start -->
+            </div>
+            <!-- Side Bar Start -->
+            <div class="col-lg-4 sidebar">
+                <div class="sidebar-widget category">
+                    <h2 class="title">Danh mục sản phẩm</h2>
+                    <nav class="navbar bg-light">
+                        <ul class="navbar-nav">
+                            @foreach (var item in (ViewBag.Category as List<Doanweb1.Models.Category>))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("", "product", new { categoryId = item.CategoryId, page = 1})"><i class="fa @item.Description"></i>@item.CategoryName</a>
+                                </li>
+                            }
+
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="sidebar-widget brands">
+                    <h2 class="title">Thương hiệu</h2>
+                    <ul>
+                        @foreach (var item in (ViewBag.brand as List<Doanweb1.ViewModels.BrandWithCountViewModel>))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("", "product", new { brand = item.BrandName, page = 1 })">@item.BrandName</a><span>(@item.ProductCount sản phẩm)</span>
+
+                            </li>
+                        }
+
+                    </ul>
+                </div>
+            </div>
+            <!-- Side Bar End -->
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".btnAddToCartOnProduct").click(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "/ShoppingCart/AddToCart",
+                    data: { "productId": $(this).data('productid'), "quantity": 1 },
+                    success: (response) => {
+                        if (response["success"] == true) {
+                            /*$("#addToCardError").hide();*/
+                            $("#cartItemCount").text(`(${response["cartItemCount"]})`);
+                        } else {
+                            /*$("#addToCardError").show();*/
+                        }
+                    }
+                });
+            })
+        });
+    </script>
+}
